@@ -7,7 +7,12 @@ The film simulation picker is a permanently visible tree (like Lightroom's prese
 instead of cascading menus. Folders are bold and toggle on click, films apply on click,
 Up/Down step through films once the tree has focus, Left/Right collapse/expand.
 A label above the tree shows the film currently applied.
-Files: `rtgui/tools/filmsimulation.{h,cc}`.
+
+Right-click a film to **Star** / **Unstar** it. Starred films get a ★ marker and are
+collected in a "★ Favorites" folder at the top of the tree. The list is stored in the
+RawTherapee options file (`[Color Management] FilmSimulationFavorites`, paths relative
+to the HaldCLUT folder) so it survives restarts and folder moves.
+Files: `rtgui/tools/filmsimulation.{h,cc}`, `rtgui/options.{h,cc}`.
 
 ## Global Film Grain tool
 A new **Film Grain** tool in the Color tab, right under Film Simulation, with

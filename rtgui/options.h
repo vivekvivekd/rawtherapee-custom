@@ -399,6 +399,7 @@ public:
 
     // Performance options
     Glib::ustring clutsDir;
+    std::vector<Glib::ustring> clutFavorites; // starred film simulation files, relative to clutsDir
     int rgbDenoiseThreadLimit; // maximum number of threads for the denoising tool ; 0 = use the maximum available
     int maxInspectorBuffers;   // maximum number of buffers (i.e. images) for the Inspector feature
     int inspectorDelay;

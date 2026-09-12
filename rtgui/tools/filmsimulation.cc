@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <chrono>
 #include <map>
 #include <set>
@@ -244,6 +245,7 @@ void FilmSimulation::trimValues( rtengine::procparams::ProcParams* pp )
 
 std::unique_ptr<ClutComboBox::ClutModel> ClutComboBox::cm;
 std::unique_ptr<ClutComboBox::ClutModel> ClutComboBox::cm2;
+bool ClutComboBox::rebuildingFavorites = false;
 
 ClutComboBox::ClutComboBox(const Glib::ustring &path):
     Gtk::TreeView(),
@@ -279,6 +281,13 @@ ClutComboBox::ClutComboBox(const Glib::ustring &path):
     get_selection()->signal_changed().connect(sigc::mem_fun(*this, &ClutComboBox::onSelectionChanged));
     signal_row_activated().connect(sigc::mem_fun(*this, &ClutComboBox::onRowActivated));
 
+    // Right-click context menu: star / unstar a film
+    starItem = Gtk::manage(new Gtk::MenuItem(M("TP_FILMSIMULATION_STAR")));
+    starItem->signal_activate().connect(sigc::mem_fun(*this, &ClutComboBox::onStarActivated));
+    popupMenu.append(*starItem);
+    popupMenu.show_all();
+    popupMenu.attach_to_widget(*this);
+
     if (!options.multiDisplayMode) {
         signal_map().connect(sigc::mem_fun(*this, &ClutComboBox::updateUnchangedEntry));
     }
@@ -291,8 +300,82 @@ sigc::signal<void>& ClutComboBox::signal_changed()
 }
 
 
+bool ClutComboBox::on_button_press_event(GdkEventButton* event)
+{
+    if (event->button == 3) {
+        Gtk::TreeModel::Path path;
+        Gtk::TreeViewColumn* column = nullptr;
+        int cellX = 0, cellY = 0;
+
+        if (get_path_at_pos(static_cast<int>(event->x), static_cast<int>(event->y), path, column, cellX, cellY)) {
+            Gtk::TreeModel::iterator iter = m_model()->get_iter(path);
+
+            if (iter) {
+                const Glib::ustring filename = (*iter)[m_columns().clutFilename];
+
+                if (!filename.empty() && filename != "NULL") {
+                    popupFilename = filename;
+                    const bool fav = ClutModel::isFavorite(filename, App::get().options().clutsDir);
+                    starItem->set_label(fav ? M("TP_FILMSIMULATION_UNSTAR") : M("TP_FILMSIMULATION_STAR"));
+                    popupMenu.popup_at_pointer(reinterpret_cast<GdkEvent*>(event));
+                }
+            }
+        }
+
+        return true;
+    }
+
+    return Gtk::TreeView::on_button_press_event(event);
+}
+
+
+void ClutComboBox::onStarActivated()
+{
+    if (!popupFilename.empty()) {
+        toggleFavorite(popupFilename);
+    }
+}
+
+
+void ClutComboBox::toggleFavorite(const Glib::ustring& filename)
+{
+    auto& options = App::get().mut_options();
+    const Glib::ustring rel = stripPrefixDir(filename, options.clutsDir);
+    auto& favs = options.clutFavorites;
+    const auto it = std::find(favs.begin(), favs.end(), rel);
+
+    if (it != favs.end()) {
+        favs.erase(it);
+    } else {
+        favs.push_back(rel);
+    }
+
+    // Rebuilding the shared model removes / inserts rows, which shuffles the
+    // selection in every view using it. None of that must reach the listener.
+    const Glib::ustring keep = selectedClutFilename;
+    rebuildingFavorites = true;
+
+    if (cm) {
+        cm->rebuildFavorites(options.clutsDir);
+    }
+
+    if (cm2) {
+        cm2->rebuildFavorites(options.clutsDir);
+    }
+
+    rebuildingFavorites = false;
+    setSelectedClut(keep);
+
+    Options::save();
+}
+
+
 void ClutComboBox::onSelectionChanged()
 {
+    if (rebuildingFavorites) {
+        return;
+    }
+
     Gtk::TreeModel::iterator current = get_selection()->get_selected();
 
     if (!current) {
@@ -374,6 +457,7 @@ void ClutComboBox::updateUnchangedEntry()
         if (c.empty() || c[c.size()-1][m_columns().clutFilename] != "NULL") {
             Gtk::TreeModel::Row row = *(m_model()->append());
             row[m_columns().label] = M("GENERAL_UNCHANGED");
+            row[m_columns().name] = M("GENERAL_UNCHANGED");
             row[m_columns().clutFilename] = "NULL";
             row[m_columns().weight] = 400;
         }
@@ -392,6 +476,7 @@ ClutComboBox::ClutColumns::ClutColumns()
     add( label );
     add( clutFilename );
     add( weight );
+    add( name );
 }
 
 ClutComboBox::ClutModel::ClutModel(const Glib::ustring &path)
@@ -399,6 +484,91 @@ ClutComboBox::ClutModel::ClutModel(const Glib::ustring &path)
     m_model = Gtk::TreeStore::create (m_columns);
     //set_model (m_model);
     count = path.empty() ? 0 : parseDir(path);
+
+    if (count > 0) {
+        rebuildFavorites(path);
+    }
+}
+
+bool ClutComboBox::ClutModel::isFavorite(const Glib::ustring& filename, const Glib::ustring& clutsDir)
+{
+    const auto& favs = App::get().options().clutFavorites;
+    const Glib::ustring rel = stripPrefixDir(filename, clutsDir);
+    return std::find(favs.begin(), favs.end(), rel) != favs.end();
+}
+
+Gtk::TreeIter ClutComboBox::ClutModel::findFile(Gtk::TreeModel::Children childs, const Glib::ustring& filename, const Gtk::TreeModel::Row& skip)
+{
+    for (Gtk::TreeModel::Children::iterator it = childs.begin(); it != childs.end(); ++it) {
+        if (skip && *it == skip) {
+            continue;
+        }
+
+        if ((*it)[m_columns.clutFilename] == filename) {
+            return it;
+        }
+
+        Gtk::TreeIter found = findFile(it->children(), filename, skip);
+
+        if (found) {
+            return found;
+        }
+    }
+
+    return Gtk::TreeIter();
+}
+
+void ClutComboBox::ClutModel::restar(Gtk::TreeModel::Children childs, const Glib::ustring& clutsDir)
+{
+    for (Gtk::TreeModel::Children::iterator it = childs.begin(); it != childs.end(); ++it) {
+        Gtk::TreeModel::Row row = *it;
+        const Glib::ustring filename = row[m_columns.clutFilename];
+
+        if (!filename.empty() && filename != "NULL") {
+            const Glib::ustring name = row[m_columns.name];
+            row[m_columns.label] = isFavorite(filename, clutsDir) ? Glib::ustring("\u2605 ") + name : name;
+        }
+
+        restar(row.children(), clutsDir);
+    }
+}
+
+void ClutComboBox::ClutModel::rebuildFavorites(const Glib::ustring& clutsDir)
+{
+    if (favRow) {
+        m_model->erase(favRow);
+        favRow = Gtk::TreeModel::Row();
+    }
+
+    const auto& favs = App::get().options().clutFavorites;
+
+    // Star markers on the regular rows
+    restar(m_model->children(), clutsDir);
+
+    if (favs.empty()) {
+        return;
+    }
+
+    favRow = *m_model->prepend();
+    favRow[m_columns.label] = M("TP_FILMSIMULATION_FAVORITES");
+    favRow[m_columns.name] = M("TP_FILMSIMULATION_FAVORITES");
+    favRow[m_columns.weight] = 700;
+
+    for (const auto& rel : favs) {
+        const Glib::ustring full = Glib::build_filename(clutsDir, rel);
+        Gtk::TreeIter orig = findFile(m_model->children(), full, favRow);
+
+        if (!orig) {
+            continue; // file no longer exists in the folder
+        }
+
+        const Glib::ustring name = (*orig)[m_columns.name];
+        Gtk::TreeModel::Row row = *m_model->append(favRow.children());
+        row[m_columns.label] = Glib::ustring("\u2605 ") + name;
+        row[m_columns.name] = name;
+        row[m_columns.clutFilename] = full;
+        row[m_columns.weight] = 400;
+    }
 }
 
 int ClutComboBox::ClutModel::parseDir(const Glib::ustring& path)
@@ -443,6 +613,7 @@ int ClutComboBox::ClutModel::parseDir(const Glib::ustring& path)
                     for (const auto& entry : sorted_dir_dirs(path)) {
                         auto newRow = row ? *m_model->append(row.children()) : *m_model->append();
                         newRow[m_columns.label] = entry.first;
+                        newRow[m_columns.name] = entry.first;
                         newRow[m_columns.weight] = 700;
 
                         nextDirs.emplace_back(entry.second, newRow);
@@ -498,6 +669,7 @@ int ClutComboBox::ClutModel::parseDir(const Glib::ustring& path)
 
             auto newRow = row ? *m_model->append(row.children()) : *m_model->append();
             newRow[m_columns.label] = name;
+            newRow[m_columns.name] = name;
             newRow[m_columns.clutFilename] = entry;
             newRow[m_columns.weight] = 400;
 

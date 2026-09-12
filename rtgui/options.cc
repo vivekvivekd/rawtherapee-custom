@@ -554,6 +554,7 @@ void Options::setDefaults()
     ICCPC_appendParamsToDesc = false;
 
     clutsDir = "./cluts";
+    clutFavorites.clear();
 
     cutOverlayBrush = std::vector<double> (4);
     cutOverlayBrush[3] = 0.667;  // :-p
@@ -2033,6 +2034,10 @@ void Options::readFromFile(Glib::ustring fname)
                     clutsDir = keyFile.get_string("Color Management", "ClutsDirectory");
                 }
 
+                if (keyFile.has_key("Color Management", "FilmSimulationFavorites")) {
+                    clutFavorites = keyFile.get_string_list("Color Management", "FilmSimulationFavorites");
+                }
+
                 //if( keyFile.has_key ("Color Management", "Ciebadpixgauss")) rtSettings.ciebadpixgauss = keyFile.get_boolean("Color Management", "Ciebadpixgauss");
 
                 if (keyFile.has_key("Color Management", "Previewselection")) {//Intensity of preview selection deltaE
@@ -2744,6 +2749,10 @@ void Options::saveToFile(Glib::ustring fname)
         //keyFile.set_double  ("Color Management", "Colortoningab", rtSettings.colortoningab);
         //keyFile.set_double  ("Color Management", "Decaction", rtSettings.decaction);
         keyFile.set_string("Color Management", "ClutsDirectory", clutsDir);
+        {
+            Glib::ArrayHandle<Glib::ustring> ahfav = clutFavorites;
+            keyFile.set_string_list("Color Management", "FilmSimulationFavorites", ahfav);
+        }
         keyFile.set_integer("Color Management", "Previewselection", rtSettings.previewselection);
         keyFile.set_double("Color Management", "Cbdlsensi", rtSettings.cbdlsensi);
         keyFile.set_double("Color Management", "Basecorlog", rtSettings.basecorlog);

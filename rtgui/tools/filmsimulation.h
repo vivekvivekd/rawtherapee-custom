@@ -36,13 +36,17 @@ private:
     void updateUnchangedEntry(); // in batchMode we need to add an extra entry "(Unchanged)". We do this whenever the widget is mapped (connecting to signal_map()), unless options.multiDisplayMode (see the comment below about cm2 in this case)
     void onSelectionChanged();
     void onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* column);
+    bool on_button_press_event(GdkEventButton* event) override;
+    void onStarActivated();
+    void toggleFavorite(const Glib::ustring& filename);
 
     class ClutColumns : public Gtk::TreeModel::ColumnRecord
     {
     public:
-        Gtk::TreeModelColumn<Glib::ustring> label;
-        Gtk::TreeModelColumn<Glib::ustring> clutFilename;
+        Gtk::TreeModelColumn<Glib::ustring> label;        // displayed text (may carry a star marker)
+        Gtk::TreeModelColumn<Glib::ustring> clutFilename; // full path, empty for folders
         Gtk::TreeModelColumn<int> weight;
+        Gtk::TreeModelColumn<Glib::ustring> name;         // plain film / folder name
         ClutColumns();
     };
 
@@ -51,8 +55,14 @@ private:
         Glib::RefPtr<Gtk::TreeStore> m_model;
         ClutColumns m_columns;
         int count;
+        Gtk::TreeModel::Row favRow; // the "★ Favorites" folder, invalid when there are no favorites
         explicit ClutModel(const Glib::ustring &path);
         int parseDir (const Glib::ustring& path);
+        void rebuildFavorites(const Glib::ustring& clutsDir);
+        static bool isFavorite(const Glib::ustring& filename, const Glib::ustring& clutsDir);
+    private:
+        Gtk::TreeIter findFile(Gtk::TreeModel::Children childs, const Glib::ustring& filename, const Gtk::TreeModel::Row& skip);
+        void restar(Gtk::TreeModel::Children childs, const Glib::ustring& clutsDir);
     };
 
     Glib::RefPtr<Gtk::TreeStore> &m_model();
@@ -65,6 +75,11 @@ private:
     bool batchMode;
     Glib::ustring selectedClutFilename; // last *film* chosen; folder rows never overwrite it
     sigc::signal<void> sigChanged;
+    static bool rebuildingFavorites;    // selection churn while the shared model is rebuilt must not apply films
+
+    Gtk::Menu popupMenu;
+    Gtk::MenuItem* starItem;
+    Glib::ustring popupFilename;        // film the context menu was opened on
 };
 
 class FilmSimulation : public ToolParamBlock, public AdjusterListener, public FoldableToolPanel
