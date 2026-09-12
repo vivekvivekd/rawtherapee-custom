@@ -76,6 +76,7 @@ set(RTENGINESOURCEFILES
     ipsharpen.cc
     ipsharpenedges.cc
     ipsoftlight.cc
+    iphalation.cc
     iptoneequalizer.cc
     iptransform.cc
     ipvibrance.cc

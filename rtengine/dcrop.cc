@@ -742,7 +742,7 @@ void Crop::update(int todo)
 
     std::unique_ptr<Imagefloat> fattalCrop;
 
-    if ((todo & M_HDR) && (params.fattal.enabled || params.dehaze.enabled)) {
+    if ((todo & M_HDR) && (params.fattal.enabled || params.dehaze.enabled || params.halation.enabled)) {
         Imagefloat *f = origCrop;
         int fw = skips(parent->fw, skip);
         int fh = skips(parent->fh, skip);
@@ -792,6 +792,7 @@ void Crop::update(int todo)
 
         if (need_fattal) {
             parent->ipf.dehaze(f, params.dehaze);
+            parent->ipf.halation(f, params.halation);
             parent->ipf.ToneMapFattal02(f, params.fattal, 3, 0, nullptr, 0, 0, 0, false);
         }
 

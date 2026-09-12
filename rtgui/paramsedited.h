@@ -1685,6 +1685,14 @@ struct SoftLightParamsEdited {
     bool strength;
 };
 
+struct HalationParamsEdited {
+    bool enabled;
+    bool strength;
+    bool radius;
+    bool threshold;
+    bool hue;
+};
+
 struct FilmGrainParamsEdited {
     bool enabled;
     bool iso;
@@ -1858,6 +1866,7 @@ struct ParamsEdited {
     FilmSimulationParamsEdited filmSimulation;
     SoftLightParamsEdited softlight;
     FilmGrainParamsEdited filmGrain;
+    HalationParamsEdited halation;
     DehazeParamsEdited dehaze;
     MetaDataParamsEdited metadata;
     FilmNegativeParamsEdited filmNegative;

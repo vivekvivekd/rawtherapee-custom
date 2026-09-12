@@ -23,6 +23,14 @@ than the exported file.
 Files: `rtgui/tools/filmgrain.{h,cc}`, `rtengine/ipgrain.cc` (`filmGrainGlobal`),
 `rtengine/procparams.*`, pipeline calls in `improccoordinator.cc`, `dcrop.cc`, `simpleprocess.cc`.
 
+## Halation tool
+A new **Halation** tool in the Color tab (Strength, Radius, Threshold, Hue) adds the
+red-orange glow film produces around bright highlights. It runs on linear RGB at the
+same stage as Dehaze, before exposure and tone curves, so the glow follows the actual
+scene highlights. Saved in the `.pp3` under `[Halation]`.
+Files: `rtgui/tools/halation.{h,cc}`, `rtengine/iphalation.cc`, `rtengine/procparams.*`,
+pipeline calls next to `dehaze` in `improccoordinator.cc`, `dcrop.cc`, `simpleprocess.cc`.
+
 ## Keyboard shortcuts
 | Key | Action | Displaced binding |
 | --- | --- | --- |
@@ -58,7 +66,7 @@ editor's Processing Profiles dropdown. Each profile sets Film Simulation (a Hald
 standing in for the mood emulation), Film Grain, Exposure (brightness, contrast,
 parametric curve, fade), Shadows/Highlights (dynamic range), Lab chromaticity
 (saturation / mute), a Colour Toning Lab shift (temp / tint / mono tone) and Soft Light
-(bloom). Halation and aberration have no RawTherapee equivalent and are noted in the
+(bloom) and Halation. Aberration has no RawTherapee equivalent and is noted in the
 profile header. Re-run the script after editing `recipes.json` or the emulation table.
 
 Note: the black-and-white HaldCLUTs in the common "RawTherapee Film Simulation" pack are

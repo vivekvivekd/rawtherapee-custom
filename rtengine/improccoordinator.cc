@@ -878,13 +878,14 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             spotprev->copyData(orig_prev);
         }
 
-        if ((todo & M_HDR) && (params->fattal.enabled || params->dehaze.enabled)) {
+        if ((todo & M_HDR) && (params->fattal.enabled || params->dehaze.enabled || params->halation.enabled)) {
             if (fattal_11_dcrop_cache) {
                 delete fattal_11_dcrop_cache;
                 fattal_11_dcrop_cache = nullptr;
             }
 
             ipf.dehaze(orig_prev, params->dehaze);
+            ipf.halation(orig_prev, params->halation);
             ipf.ToneMapFattal02(orig_prev, params->fattal, 3, 0, nullptr, 0, 0, 0, false);
 
             if (oprevi != orig_prev) {

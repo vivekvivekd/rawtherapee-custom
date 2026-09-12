@@ -1716,6 +1716,11 @@ HISTORY_MSG_FILMGRAIN_ISO;Film grain - ISO
 HISTORY_MSG_FILMGRAIN_STRENGTH;Film grain - Strength
 HISTORY_MSG_FILMGRAIN_SCALE;Film grain - Scale
 HISTORY_MSG_FILMGRAIN_GAMMA;Film grain - Gamma
+HISTORY_MSG_HALATION_ENABLED;Halation
+HISTORY_MSG_HALATION_STRENGTH;Halation - Strength
+HISTORY_MSG_HALATION_RADIUS;Halation - Radius
+HISTORY_MSG_HALATION_THRESHOLD;Halation - Threshold
+HISTORY_MSG_HALATION_HUE;Halation - Hue
 HISTORY_MSG_SPOT;Spot removal
 HISTORY_MSG_SPOT_ENTRY;Spot removal - Point modif.
 HISTORY_MSG_TEMPOUT;CAM02 automatic temperature
@@ -2054,6 +2059,7 @@ PARTIALPASTE_SHARPENING;Sharpening (USM/RL)
 PARTIALPASTE_SHARPENMICRO;Microcontrast
 PARTIALPASTE_SOFTLIGHT;Soft light
 PARTIALPASTE_FILMGRAIN;Film grain
+PARTIALPASTE_HALATION;Halation
 PARTIALPASTE_SPOT;Spot removal
 PARTIALPASTE_TM_FATTAL;Dynamic range compression
 PARTIALPASTE_TONE_EQUALIZER;Tone equalizer
@@ -4456,6 +4462,12 @@ TP_SHARPENMICRO_LABEL;Microcontrast
 TP_SHARPENMICRO_MATRIX;3×3 matrix instead of 5×5
 TP_SHARPENMICRO_UNIFORMITY;Uniformity
 TP_FILMGRAIN_LABEL;Film Grain
+TP_HALATION_LABEL;Halation
+TP_HALATION_STRENGTH;Strength
+TP_HALATION_RADIUS;Radius
+TP_HALATION_THRESHOLD;Threshold
+TP_HALATION_HUE;Hue
+TP_HALATION_TOOLTIP;Red-orange glow spilling from bright highlights, like colour negative film without an anti-halation layer (e.g. CineStill 800T).\nThreshold sets how bright a pixel must be to glow; Radius is in full-image pixels; Hue 0 is pure red, 30 orange, 60 yellow.
 TP_FILMGRAIN_ISO;Distribution (ISO)
 TP_FILMGRAIN_STRENGTH;Strength
 TP_FILMGRAIN_SCALE;Scale

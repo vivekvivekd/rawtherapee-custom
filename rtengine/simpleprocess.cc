@@ -981,6 +981,7 @@ private:
 
 
         ipf.dehaze(baseImg, params.dehaze);
+        ipf.halation(baseImg, params.halation);
         ipf.ToneMapFattal02(baseImg, params.fattal, 3, 0, nullptr, 0, 0, 0, false);
 
         // perform transform (excepted resizing)

@@ -891,6 +891,7 @@ void Spot::tweakParams(procparams::ProcParams& pparams)
     pparams.sharpening.enabled = false;
     pparams.softlight.enabled = false;
     pparams.filmGrain.enabled = false;
+    pparams.halation.enabled = false;
     pparams.gradient.enabled = false;
     pparams.pcvignette.enabled = false;
     pparams.colorappearance.enabled = false;

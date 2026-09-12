@@ -3493,6 +3493,30 @@ bool SoftLightParams::operator !=(const SoftLightParams& other) const
     return !(*this == other);
 }
 
+HalationParams::HalationParams() :
+    enabled(false),
+    strength(30),
+    radius(40),
+    threshold(70),
+    hue(15)
+{
+}
+
+bool HalationParams::operator ==(const HalationParams& other) const
+{
+    return
+        enabled == other.enabled
+        && strength == other.strength
+        && radius == other.radius
+        && threshold == other.threshold
+        && hue == other.hue;
+}
+
+bool HalationParams::operator !=(const HalationParams& other) const
+{
+    return !(*this == other);
+}
+
 FilmGrainParams::FilmGrainParams() :
     enabled(false),
     iso(400),
@@ -4073,6 +4097,7 @@ void ProcParams::setDefaults()
 
     softlight = {};
     filmGrain = {};
+    halation = {};
 
     dehaze = {};
 
@@ -5012,6 +5037,13 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
 // Soft Light
         saveToKeyfile(!pedited || pedited->softlight.enabled, "SoftLight", "Enabled", softlight.enabled, keyFile);
         saveToKeyfile(!pedited || pedited->softlight.strength, "SoftLight", "Strength", softlight.strength, keyFile);
+
+// Halation
+        saveToKeyfile(!pedited || pedited->halation.enabled, "Halation", "Enabled", halation.enabled, keyFile);
+        saveToKeyfile(!pedited || pedited->halation.strength, "Halation", "Strength", halation.strength, keyFile);
+        saveToKeyfile(!pedited || pedited->halation.radius, "Halation", "Radius", halation.radius, keyFile);
+        saveToKeyfile(!pedited || pedited->halation.threshold, "Halation", "Threshold", halation.threshold, keyFile);
+        saveToKeyfile(!pedited || pedited->halation.hue, "Halation", "Hue", halation.hue, keyFile);
 
 // Film Grain
         saveToKeyfile(!pedited || pedited->filmGrain.enabled, "FilmGrain", "Enabled", filmGrain.enabled, keyFile);
@@ -6887,6 +6919,14 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "SoftLight", "Strength", softlight.strength, pedited->softlight.strength);
         }
 
+        if (keyFile.has_group("Halation")) {
+            assignFromKeyfile(keyFile, "Halation", "Enabled", halation.enabled, pedited->halation.enabled);
+            assignFromKeyfile(keyFile, "Halation", "Strength", halation.strength, pedited->halation.strength);
+            assignFromKeyfile(keyFile, "Halation", "Radius", halation.radius, pedited->halation.radius);
+            assignFromKeyfile(keyFile, "Halation", "Threshold", halation.threshold, pedited->halation.threshold);
+            assignFromKeyfile(keyFile, "Halation", "Hue", halation.hue, pedited->halation.hue);
+        }
+
         if (keyFile.has_group("FilmGrain")) {
             assignFromKeyfile(keyFile, "FilmGrain", "Enabled", filmGrain.enabled, pedited->filmGrain.enabled);
             assignFromKeyfile(keyFile, "FilmGrain", "Iso", filmGrain.iso, pedited->filmGrain.iso);
@@ -7477,6 +7517,7 @@ bool ProcParams::operator ==(const ProcParams& other) const
         && filmSimulation == other.filmSimulation
         && softlight == other.softlight
         && filmGrain == other.filmGrain
+        && halation == other.halation
         && rgbCurves == other.rgbCurves
         && colorToning == other.colorToning
         && metadata == other.metadata

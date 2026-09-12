@@ -253,6 +253,7 @@ PartialPasteDlg::PartialPasteDlg (const Glib::ustring &title, Gtk::Window* paren
     filmSimulation = Gtk::manage (new Gtk::CheckButton (M("PARTIALPASTE_FILMSIMULATION")) );
     softlight = Gtk::manage (new Gtk::CheckButton (M("PARTIALPASTE_SOFTLIGHT")) );
     filmGrain = Gtk::manage (new Gtk::CheckButton (M("PARTIALPASTE_FILMGRAIN")) );
+    halation = Gtk::manage (new Gtk::CheckButton (M("PARTIALPASTE_HALATION")) );
     rgbcurves   = Gtk::manage (new Gtk::CheckButton (M("PARTIALPASTE_RGBCURVES")));
     colortoning = Gtk::manage (new Gtk::CheckButton (M("PARTIALPASTE_COLORTONING")));
 
@@ -369,6 +370,7 @@ PartialPasteDlg::PartialPasteDlg (const Glib::ustring &title, Gtk::Window* paren
     vboxes[2]->pack_start (*hsveq, Gtk::PACK_SHRINK, 2);
     vboxes[2]->pack_start (*filmSimulation, Gtk::PACK_SHRINK, 2);
     vboxes[2]->pack_start (*filmGrain, Gtk::PACK_SHRINK, 2);
+    vboxes[2]->pack_start (*halation, Gtk::PACK_SHRINK, 2);
     vboxes[2]->pack_start (*filmNegative, Gtk::PACK_SHRINK, 2);
     vboxes[2]->pack_start (*softlight, Gtk::PACK_SHRINK, 2);
     vboxes[2]->pack_start (*rgbcurves, Gtk::PACK_SHRINK, 2);
@@ -542,6 +544,7 @@ PartialPasteDlg::PartialPasteDlg (const Glib::ustring &title, Gtk::Window* paren
     filmSimulationConn = filmSimulation->signal_toggled().connect (sigc::bind (sigc::mem_fun(*color, &Gtk::CheckButton::set_inconsistent), true));
     softlightConn = softlight->signal_toggled().connect (sigc::bind (sigc::mem_fun(*color, &Gtk::CheckButton::set_inconsistent), true));
     filmGrainConn = filmGrain->signal_toggled().connect (sigc::bind (sigc::mem_fun(*color, &Gtk::CheckButton::set_inconsistent), true));
+    halationConn = halation->signal_toggled().connect (sigc::bind (sigc::mem_fun(*color, &Gtk::CheckButton::set_inconsistent), true));
     rgbcurvesConn   = rgbcurves->signal_toggled().connect (sigc::bind (sigc::mem_fun(*color, &Gtk::CheckButton::set_inconsistent), true));
     colortoningConn = colortoning->signal_toggled().connect (sigc::bind (sigc::mem_fun(*color, &Gtk::CheckButton::set_inconsistent), true));
 
@@ -796,6 +799,7 @@ void PartialPasteDlg::colorToggled ()
     ConnectionBlocker filmNegativeBlocker(filmNegativeConn);
     ConnectionBlocker softlightBlocker(softlightConn);
     ConnectionBlocker filmGrainBlocker(filmGrainConn);
+    ConnectionBlocker halationBlocker(halationConn);
     ConnectionBlocker rgbcurvesBlocker(rgbcurvesConn);
     ConnectionBlocker colortoningBlocker(colortoningConn);
 
@@ -811,6 +815,7 @@ void PartialPasteDlg::colorToggled ()
     filmNegative->set_active (color->get_active());
     softlight->set_active (color->get_active ());
     filmGrain->set_active (color->get_active ());
+    halation->set_active (color->get_active ());
     rgbcurves->set_active (color->get_active ());
     colortoning->set_active(color->get_active ());
 }
@@ -1020,6 +1025,10 @@ void PartialPasteDlg::applyPaste (rtengine::procparams::ProcParams* dstPP, Param
 
     if (!filmGrain->get_active ()) {
         filterPE.filmGrain = falsePE.filmGrain;
+    }
+
+    if (!halation->get_active ()) {
+        filterPE.halation = falsePE.halation;
     }
 
     if (!dehaze->get_active ()) {

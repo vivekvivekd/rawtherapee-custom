@@ -980,6 +980,11 @@ void ParamsEdited::set(bool v)
     filmGrain.strength = v;
     filmGrain.scale = v;
     filmGrain.gamma = v;
+    halation.enabled = v;
+    halation.strength = v;
+    halation.radius = v;
+    halation.threshold = v;
+    halation.hue = v;
     dehaze.enabled = v;
     dehaze.strength = v;
     dehaze.showDepthMap = v;
@@ -2633,6 +2638,11 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         filmGrain.strength = filmGrain.strength && p.filmGrain.strength == other.filmGrain.strength;
         filmGrain.scale = filmGrain.scale && p.filmGrain.scale == other.filmGrain.scale;
         filmGrain.gamma = filmGrain.gamma && p.filmGrain.gamma == other.filmGrain.gamma;
+        halation.enabled = halation.enabled && p.halation.enabled == other.halation.enabled;
+        halation.strength = halation.strength && p.halation.strength == other.halation.strength;
+        halation.radius = halation.radius && p.halation.radius == other.halation.radius;
+        halation.threshold = halation.threshold && p.halation.threshold == other.halation.threshold;
+        halation.hue = halation.hue && p.halation.hue == other.halation.hue;
         dehaze.enabled = dehaze.enabled && p.dehaze.enabled == other.dehaze.enabled;
         dehaze.strength = dehaze.strength && p.dehaze.strength == other.dehaze.strength;
         dehaze.showDepthMap = dehaze.showDepthMap && p.dehaze.showDepthMap == other.dehaze.showDepthMap;
@@ -8755,6 +8765,26 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
 
     if (filmGrain.gamma) {
         toEdit.filmGrain.gamma = mods.filmGrain.gamma;
+    }
+
+    if (halation.enabled) {
+        toEdit.halation.enabled = mods.halation.enabled;
+    }
+
+    if (halation.strength) {
+        toEdit.halation.strength = mods.halation.strength;
+    }
+
+    if (halation.radius) {
+        toEdit.halation.radius = mods.halation.radius;
+    }
+
+    if (halation.threshold) {
+        toEdit.halation.threshold = mods.halation.threshold;
+    }
+
+    if (halation.hue) {
+        toEdit.halation.hue = mods.halation.hue;
     }
 
     if (dehaze.enabled) {

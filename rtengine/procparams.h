@@ -1671,6 +1671,22 @@ struct SoftLightParams {
 /**
  * Global film grain (same generator as the Local Adjustments grain, applied to the whole image).
  */
+/**
+ * Film halation: red-orange glow around bright highlights, applied on linear RGB before tone curves.
+ */
+struct HalationParams {
+    bool enabled;
+    int strength;   // 0..100
+    int radius;     // blur radius in full-image pixels, 1..300
+    int threshold;  // highlight threshold in % of white, 0..100
+    int hue;        // glow hue in degrees, 0 (red) .. 90
+
+    HalationParams();
+
+    bool operator==(const HalationParams &other) const;
+    bool operator!=(const HalationParams &other) const;
+};
+
 struct FilmGrainParams {
     bool enabled;
     int iso;        // grain size distribution, 20..6400
@@ -1980,6 +1996,7 @@ public:
     FilmSimulationParams    filmSimulation;  ///< film simulation parameters
     SoftLightParams         softlight;       ///< softlight parameters
     FilmGrainParams         filmGrain;       ///< global film grain parameters
+    HalationParams          halation;        ///< film halation parameters
     DehazeParams            dehaze;          ///< dehaze parameters
     FilmNegativeParams      filmNegative;    ///< Film negative parameters
     int                     rank;            ///< Custom image quality ranking
