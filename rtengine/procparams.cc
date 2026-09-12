@@ -3497,8 +3497,10 @@ HalationParams::HalationParams() :
     enabled(false),
     strength(30),
     radius(40),
-    threshold(70),
-    hue(15)
+    threshold(60),
+    hue(15),
+    bloom(0),
+    bloomRadius(120)
 {
 }
 
@@ -3509,7 +3511,9 @@ bool HalationParams::operator ==(const HalationParams& other) const
         && strength == other.strength
         && radius == other.radius
         && threshold == other.threshold
-        && hue == other.hue;
+        && hue == other.hue
+        && bloom == other.bloom
+        && bloomRadius == other.bloomRadius;
 }
 
 bool HalationParams::operator !=(const HalationParams& other) const
@@ -5044,6 +5048,8 @@ int ProcParams::save(const Glib::ustring& fname, const Glib::ustring& fname2, bo
         saveToKeyfile(!pedited || pedited->halation.radius, "Halation", "Radius", halation.radius, keyFile);
         saveToKeyfile(!pedited || pedited->halation.threshold, "Halation", "Threshold", halation.threshold, keyFile);
         saveToKeyfile(!pedited || pedited->halation.hue, "Halation", "Hue", halation.hue, keyFile);
+        saveToKeyfile(!pedited || pedited->halation.bloom, "Halation", "Bloom", halation.bloom, keyFile);
+        saveToKeyfile(!pedited || pedited->halation.bloomRadius, "Halation", "BloomRadius", halation.bloomRadius, keyFile);
 
 // Film Grain
         saveToKeyfile(!pedited || pedited->filmGrain.enabled, "FilmGrain", "Enabled", filmGrain.enabled, keyFile);
@@ -6925,6 +6931,8 @@ int ProcParams::load(const Glib::ustring& fname, ParamsEdited* pedited)
             assignFromKeyfile(keyFile, "Halation", "Radius", halation.radius, pedited->halation.radius);
             assignFromKeyfile(keyFile, "Halation", "Threshold", halation.threshold, pedited->halation.threshold);
             assignFromKeyfile(keyFile, "Halation", "Hue", halation.hue, pedited->halation.hue);
+            assignFromKeyfile(keyFile, "Halation", "Bloom", halation.bloom, pedited->halation.bloom);
+            assignFromKeyfile(keyFile, "Halation", "BloomRadius", halation.bloomRadius, pedited->halation.bloomRadius);
         }
 
         if (keyFile.has_group("FilmGrain")) {

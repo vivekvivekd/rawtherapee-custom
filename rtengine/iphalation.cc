@@ -50,7 +50,7 @@ void hueToRgb(float hue, float& r, float& g, float& b)
 
 void ImProcFunctions::halation(Imagefloat* img, const procparams::HalationParams& p)
 {
-    if (!p.enabled || p.strength <= 0 || !img) {
+    if (!p.enabled || (p.strength <= 0 && p.bloom <= 0) || !img) {
         return;
     }
 
@@ -61,10 +61,14 @@ void ImProcFunctions::halation(Imagefloat* img, const procparams::HalationParams
         return;
     }
 
-    const float thr = LIM(static_cast<float>(p.threshold) / 100.f, 0.f, 0.99f);
+    // Threshold is perceptual (display brightness), the data here is linear.
+    const float thr = LIM(static_cast<float>(p.threshold) / 100.f, 0.f, 0.98f);
     const float invRange = 1.f / (1.f - thr);
-    const float amount = 0.9f * static_cast<float>(p.strength) / 100.f;
-    const double sigma = std::max(0.5, static_cast<double>(p.radius) / std::max(scale, 1.0));
+    const float amountH = 1.2f * static_cast<float>(p.strength) / 100.f;
+    const float amountB = 1.2f * static_cast<float>(p.bloom) / 100.f;
+    const double sc = std::max(scale, 1.0);
+    const double sigmaH = std::max(0.5, static_cast<double>(p.radius) / sc);
+    const double sigmaB = std::max(0.5, static_cast<double>(p.bloomRadius) / sc);
 
     float cr, cg, cb;
     hueToRgb(static_cast<float>(p.hue), cr, cg, cb);
@@ -77,27 +81,52 @@ void ImProcFunctions::halation(Imagefloat* img, const procparams::HalationParams
 #endif
     for (int y = 0; y < H; ++y) {
         for (int x = 0; x < W; ++x) {
-            const float l = (0.2126f * img->r(y, x) + 0.7152f * img->g(y, x) + 0.0722f * img->b(y, x)) / 65535.f;
-            glow[y][x] = std::max(l - thr, 0.f) * invRange;
+            const float l = std::max(0.2126f * img->r(y, x) + 0.7152f * img->g(y, x) + 0.0722f * img->b(y, x), 0.f) / 65535.f;
+            const float lp = std::pow(l, 1.f / 2.2f);
+            const float m = std::max(lp - thr, 0.f) * invRange;
+            glow[y][x] = m * m * l; // soft knee, weighted by actual light so brighter sources glow more
         }
     }
 
+    if (amountH > 0.f) {
 #ifdef _OPENMP
-    #pragma omp parallel if (multiThread)
+        #pragma omp parallel if (multiThread)
 #endif
-    {
-        gaussianBlur(glow, blurred, W, H, sigma);
-    }
+        {
+            gaussianBlur(glow, blurred, W, H, sigmaH);
+        }
 
 #ifdef _OPENMP
-    #pragma omp parallel for if (multiThread)
+        #pragma omp parallel for if (multiThread)
 #endif
-    for (int y = 0; y < H; ++y) {
-        for (int x = 0; x < W; ++x) {
-            const float g = blurred[y][x] * amount * 65535.f;
-            img->r(y, x) += g * cr;
-            img->g(y, x) += g * cg;
-            img->b(y, x) += g * cb;
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                const float g = blurred[y][x] * amountH * 65535.f;
+                img->r(y, x) += g * cr;
+                img->g(y, x) += g * cg;
+                img->b(y, x) += g * cb;
+            }
+        }
+    }
+
+    if (amountB > 0.f) {
+#ifdef _OPENMP
+        #pragma omp parallel if (multiThread)
+#endif
+        {
+            gaussianBlur(glow, blurred, W, H, sigmaB);
+        }
+
+#ifdef _OPENMP
+        #pragma omp parallel for if (multiThread)
+#endif
+        for (int y = 0; y < H; ++y) {
+            for (int x = 0; x < W; ++x) {
+                const float g = blurred[y][x] * amountB * 65535.f;
+                img->r(y, x) += g;
+                img->g(y, x) += g;
+                img->b(y, x) += g;
+            }
         }
     }
 }

@@ -1680,6 +1680,8 @@ struct HalationParams {
     int radius;     // blur radius in full-image pixels, 1..300
     int threshold;  // highlight threshold in % of white, 0..100
     int hue;        // glow hue in degrees, 0 (red) .. 90
+    int bloom;      // white glow strength 0..100
+    int bloomRadius;// white glow radius in full-image pixels, 1..500
 
     HalationParams();
 

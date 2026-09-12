@@ -17,7 +17,7 @@ Mapping (mood -> RawTherapee)
   Saturation / Mute    -> Lab chromaticity  +12 / -12 per step
   Temp / Tint          -> Colour Toning "Lab regions" a/b offset (works after the CLUT)
   Grain level / size   -> Film Grain strength (14 per level) / ISO (size)
-  Bloom                -> Soft Light 15 / 30 / 45 / 60
+  Bloom                -> Halation tool white bloom 15 / 30 / 45 / 60 (radius 120)
   Halation             -> Halation tool strength 20 / 35 / 50 / 70 (red-orange, radius 40)
   Aberration           -> no RawTherapee equivalent (noted in the profile header)
   Brightness           -> Exposure compensation (x1.5 EV)
@@ -140,8 +140,8 @@ def pp3(recipe, cluts):
     parts.append(f"[Luminance Curve]\nEnabled=true\nBrightness=0\nContrast=0\nChromaticity={chroma:.0f}\n")
     parts.append(f"[Film Simulation]\nEnabled=true\nClutFilename={clut}\nStrength={STRENGTH[recipe['strength']]}\n")
     parts.append(f"[FilmGrain]\nEnabled={'true' if grain > 0 else 'false'}\nIso={GRAIN_ISO[recipe['grain_size']]}\nStrength={grain:.0f}\nScale=100\nGamma=1\n")
-    parts.append(f"[SoftLight]\nEnabled={'true' if bloom > 0 else 'false'}\nStrength={bloom}\n")
-    parts.append(f"[Halation]\nEnabled={'true' if halation > 0 else 'false'}\nStrength={halation}\nRadius=40\nThreshold=70\nHue=15\n")
+    parts.append("[SoftLight]\nEnabled=false\n")
+    parts.append(f"[Halation]\nEnabled={'true' if (halation > 0 or bloom > 0) else 'false'}\nStrength={halation}\nRadius=40\nThreshold=60\nHue=15\nBloom={bloom}\nBloomRadius=120\n")
     if abs(a) > 1e-6 or abs(b) > 1e-6:
         parts.append(
             "[ColorToning]\nEnabled=true\nMethod=LabRegions\n"

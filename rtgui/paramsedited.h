@@ -1691,6 +1691,8 @@ struct HalationParamsEdited {
     bool radius;
     bool threshold;
     bool hue;
+    bool bloom;
+    bool bloomRadius;
 };
 
 struct FilmGrainParamsEdited {

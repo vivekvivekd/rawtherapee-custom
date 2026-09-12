@@ -22,12 +22,16 @@ private:
     Adjuster *radius;
     Adjuster *threshold;
     Adjuster *hue;
+    Adjuster *bloom;
+    Adjuster *bloomRadius;
 
     rtengine::ProcEvent EvHalationEnabled;
     rtengine::ProcEvent EvHalationStrength;
     rtengine::ProcEvent EvHalationRadius;
     rtengine::ProcEvent EvHalationThreshold;
     rtengine::ProcEvent EvHalationHue;
+    rtengine::ProcEvent EvHalationBloom;
+    rtengine::ProcEvent EvHalationBloomRadius;
 
 public:
     static const Glib::ustring TOOL_NAME;

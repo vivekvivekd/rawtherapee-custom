@@ -27,15 +27,19 @@ Halation::Halation(): FoldableToolPanel(this, TOOL_NAME, M("TP_HALATION_LABEL"),
     EvHalationRadius    = m->newEvent(HDR, "HISTORY_MSG_HALATION_RADIUS");
     EvHalationThreshold = m->newEvent(HDR, "HISTORY_MSG_HALATION_THRESHOLD");
     EvHalationHue       = m->newEvent(HDR, "HISTORY_MSG_HALATION_HUE");
+    EvHalationBloom     = m->newEvent(HDR, "HISTORY_MSG_HALATION_BLOOM");
+    EvHalationBloomRadius = m->newEvent(HDR, "HISTORY_MSG_HALATION_BLOOMRADIUS");
 
     set_tooltip_text(M("TP_HALATION_TOOLTIP"));
 
     strength  = Gtk::manage(new Adjuster(M("TP_HALATION_STRENGTH"), 0, 100, 1, 30));
     radius    = Gtk::manage(new Adjuster(M("TP_HALATION_RADIUS"), 1, 300, 1, 40));
-    threshold = Gtk::manage(new Adjuster(M("TP_HALATION_THRESHOLD"), 0, 100, 1, 70));
+    threshold = Gtk::manage(new Adjuster(M("TP_HALATION_THRESHOLD"), 0, 100, 1, 60));
     hue       = Gtk::manage(new Adjuster(M("TP_HALATION_HUE"), 0, 90, 1, 15));
+    bloom     = Gtk::manage(new Adjuster(M("TP_HALATION_BLOOM"), 0, 100, 1, 0));
+    bloomRadius = Gtk::manage(new Adjuster(M("TP_HALATION_BLOOMRADIUS"), 1, 500, 1, 120));
 
-    for (Adjuster* a : {strength, radius, threshold, hue}) {
+    for (Adjuster* a : {strength, radius, threshold, hue, bloom, bloomRadius}) {
         a->setAdjusterListener(this);
         a->show();
         pack_start(*a);
@@ -52,6 +56,8 @@ void Halation::read(const ProcParams *pp, const ParamsEdited *pedited)
         radius->setEditedState(pedited->halation.radius ? Edited : UnEdited);
         threshold->setEditedState(pedited->halation.threshold ? Edited : UnEdited);
         hue->setEditedState(pedited->halation.hue ? Edited : UnEdited);
+        bloom->setEditedState(pedited->halation.bloom ? Edited : UnEdited);
+        bloomRadius->setEditedState(pedited->halation.bloomRadius ? Edited : UnEdited);
         set_inconsistent(multiImage && !pedited->halation.enabled);
     }
 
@@ -60,6 +66,8 @@ void Halation::read(const ProcParams *pp, const ParamsEdited *pedited)
     radius->setValue(pp->halation.radius);
     threshold->setValue(pp->halation.threshold);
     hue->setValue(pp->halation.hue);
+    bloom->setValue(pp->halation.bloom);
+    bloomRadius->setValue(pp->halation.bloomRadius);
 
     enableListener();
 }
@@ -72,6 +80,8 @@ void Halation::write(ProcParams *pp, ParamsEdited *pedited)
     pp->halation.radius = radius->getIntValue();
     pp->halation.threshold = threshold->getIntValue();
     pp->halation.hue = hue->getIntValue();
+    pp->halation.bloom = bloom->getIntValue();
+    pp->halation.bloomRadius = bloomRadius->getIntValue();
 
     if (pedited) {
         pedited->halation.enabled = !get_inconsistent();
@@ -79,6 +89,8 @@ void Halation::write(ProcParams *pp, ParamsEdited *pedited)
         pedited->halation.radius = radius->getEditedState();
         pedited->halation.threshold = threshold->getEditedState();
         pedited->halation.hue = hue->getEditedState();
+        pedited->halation.bloom = bloom->getEditedState();
+        pedited->halation.bloomRadius = bloomRadius->getEditedState();
     }
 }
 
@@ -89,17 +101,23 @@ void Halation::setDefaults(const ProcParams *defParams, const ParamsEdited *pedi
     radius->setDefault(defParams->halation.radius);
     threshold->setDefault(defParams->halation.threshold);
     hue->setDefault(defParams->halation.hue);
+    bloom->setDefault(defParams->halation.bloom);
+    bloomRadius->setDefault(defParams->halation.bloomRadius);
 
     if (pedited) {
         strength->setDefaultEditedState(pedited->halation.strength ? Edited : UnEdited);
         radius->setDefaultEditedState(pedited->halation.radius ? Edited : UnEdited);
         threshold->setDefaultEditedState(pedited->halation.threshold ? Edited : UnEdited);
         hue->setDefaultEditedState(pedited->halation.hue ? Edited : UnEdited);
+        bloom->setDefaultEditedState(pedited->halation.bloom ? Edited : UnEdited);
+        bloomRadius->setDefaultEditedState(pedited->halation.bloomRadius ? Edited : UnEdited);
     } else {
         strength->setDefaultEditedState(Irrelevant);
         radius->setDefaultEditedState(Irrelevant);
         threshold->setDefaultEditedState(Irrelevant);
         hue->setDefaultEditedState(Irrelevant);
+        bloom->setDefaultEditedState(Irrelevant);
+        bloomRadius->setDefaultEditedState(Irrelevant);
     }
 }
 
@@ -115,6 +133,10 @@ void Halation::adjusterChanged(Adjuster* a, double newval)
             listener->panelChanged(EvHalationThreshold, a->getTextValue());
         } else if (a == hue) {
             listener->panelChanged(EvHalationHue, a->getTextValue());
+        } else if (a == bloom) {
+            listener->panelChanged(EvHalationBloom, a->getTextValue());
+        } else if (a == bloomRadius) {
+            listener->panelChanged(EvHalationBloomRadius, a->getTextValue());
         }
     }
 }
@@ -142,4 +164,6 @@ void Halation::setBatchMode(bool batchMode)
     radius->showEditedCB();
     threshold->showEditedCB();
     hue->showEditedCB();
+    bloom->showEditedCB();
+    bloomRadius->showEditedCB();
 }

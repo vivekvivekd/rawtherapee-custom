@@ -1721,6 +1721,8 @@ HISTORY_MSG_HALATION_STRENGTH;Halation - Strength
 HISTORY_MSG_HALATION_RADIUS;Halation - Radius
 HISTORY_MSG_HALATION_THRESHOLD;Halation - Threshold
 HISTORY_MSG_HALATION_HUE;Halation - Hue
+HISTORY_MSG_HALATION_BLOOM;Halation - Bloom
+HISTORY_MSG_HALATION_BLOOMRADIUS;Halation - Bloom radius
 HISTORY_MSG_SPOT;Spot removal
 HISTORY_MSG_SPOT_ENTRY;Spot removal - Point modif.
 HISTORY_MSG_TEMPOUT;CAM02 automatic temperature
@@ -4467,7 +4469,9 @@ TP_HALATION_STRENGTH;Strength
 TP_HALATION_RADIUS;Radius
 TP_HALATION_THRESHOLD;Threshold
 TP_HALATION_HUE;Hue
-TP_HALATION_TOOLTIP;Red-orange glow spilling from bright highlights, like colour negative film without an anti-halation layer (e.g. CineStill 800T).\nThreshold sets how bright a pixel must be to glow; Radius is in full-image pixels; Hue 0 is pure red, 30 orange, 60 yellow.
+TP_HALATION_BLOOM;Bloom
+TP_HALATION_BLOOMRADIUS;Bloom radius
+TP_HALATION_TOOLTIP;Red-orange glow spilling from bright highlights, like colour negative film without an anti-halation layer (e.g. CineStill 800T).\nThreshold sets how bright a pixel must be to glow (display brightness); Radius is in full-image pixels; Hue 0 is pure red, 30 orange, 60 yellow.\nBloom adds a neutral white glow with its own, usually larger, radius.
 TP_FILMGRAIN_ISO;Distribution (ISO)
 TP_FILMGRAIN_STRENGTH;Strength
 TP_FILMGRAIN_SCALE;Scale

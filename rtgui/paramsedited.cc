@@ -985,6 +985,8 @@ void ParamsEdited::set(bool v)
     halation.radius = v;
     halation.threshold = v;
     halation.hue = v;
+    halation.bloom = v;
+    halation.bloomRadius = v;
     dehaze.enabled = v;
     dehaze.strength = v;
     dehaze.showDepthMap = v;
@@ -2643,6 +2645,8 @@ void ParamsEdited::initFrom(const std::vector<rtengine::procparams::ProcParams>&
         halation.radius = halation.radius && p.halation.radius == other.halation.radius;
         halation.threshold = halation.threshold && p.halation.threshold == other.halation.threshold;
         halation.hue = halation.hue && p.halation.hue == other.halation.hue;
+        halation.bloom = halation.bloom && p.halation.bloom == other.halation.bloom;
+        halation.bloomRadius = halation.bloomRadius && p.halation.bloomRadius == other.halation.bloomRadius;
         dehaze.enabled = dehaze.enabled && p.dehaze.enabled == other.dehaze.enabled;
         dehaze.strength = dehaze.strength && p.dehaze.strength == other.dehaze.strength;
         dehaze.showDepthMap = dehaze.showDepthMap && p.dehaze.showDepthMap == other.dehaze.showDepthMap;
@@ -8785,6 +8789,14 @@ void ParamsEdited::combine(rtengine::procparams::ProcParams& toEdit, const rteng
 
     if (halation.hue) {
         toEdit.halation.hue = mods.halation.hue;
+    }
+
+    if (halation.bloom) {
+        toEdit.halation.bloom = mods.halation.bloom;
+    }
+
+    if (halation.bloomRadius) {
+        toEdit.halation.bloomRadius = mods.halation.bloomRadius;
     }
 
     if (dehaze.enabled) {
