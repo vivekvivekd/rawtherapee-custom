@@ -73,8 +73,21 @@ FilmSimulation::FilmSimulation()
         pack_start( *Gtk::manage( new Gtk::Label( M("TP_FILMSIMULATION_ZEROCLUTSFOUND") ) ) );
     }
 
+    // Always-visible name of the film currently applied (the tree may be collapsed)
+    m_currentLabel = Gtk::manage( new Gtk::Label() );
+    m_currentLabel->set_halign( Gtk::ALIGN_START );
+    m_currentLabel->set_ellipsize( Pango::ELLIPSIZE_END );
+    m_currentLabel->set_margin_bottom( 2 );
+    m_currentLabel->get_style_context()->add_class( "dim-label" );
+    pack_start( *m_currentLabel, Gtk::PACK_SHRINK, 0 );
+    updateCurrentLabel();
+
     m_clutComboBoxConn = m_clutComboBox->signal_changed().connect( sigc::mem_fun( *this, &FilmSimulation::onClutSelected ) );
-    pack_start( *m_clutComboBox );
+
+    Gtk::Frame* const frame = Gtk::manage( new Gtk::Frame() );
+    frame->set_shadow_type( Gtk::SHADOW_IN );
+    frame->add( *m_clutComboBox );
+    pack_start( *frame, Gtk::PACK_SHRINK, 0 );
 
     m_strength = Gtk::manage( new Adjuster( M("TP_FILMSIMULATION_STRENGTH"), 0., 100, 1., 100 ) );
     m_strength->setAdjusterListener( this );
@@ -83,9 +96,31 @@ FilmSimulation::FilmSimulation()
 
 }
 
+void FilmSimulation::updateCurrentLabel()
+{
+    const Glib::ustring current = m_clutComboBox->getSelectedClut();
+
+    if ( current.empty() || current == "NULL" ) {
+        m_currentLabel->set_text( "\u2014" );
+        m_currentLabel->set_tooltip_text( "" );
+    } else {
+        Glib::ustring clutName, dummy;
+        HaldCLUT::splitClutFilename( current, clutName, dummy, dummy );
+        m_currentLabel->set_text( clutName );
+        m_currentLabel->set_tooltip_text( current );
+    }
+}
+
 void FilmSimulation::onClutSelected()
 {
     Glib::ustring currentClutFilename = m_clutComboBox->getSelectedClut();
+
+    if ( currentClutFilename.empty() ) {
+        // A folder row was selected: nothing to apply, keep the current film.
+        return;
+    }
+
+    updateCurrentLabel();
 
     if ( getEnabled() && !currentClutFilename.empty() && listener && currentClutFilename != m_oldClutFilename ) {
         Glib::ustring clutName, dummy;
@@ -141,8 +176,10 @@ void FilmSimulation::read( const rtengine::procparams::ProcParams* pp, const Par
         );
         m_oldClutFilename = m_clutComboBox->getSelectedClut();
     } else {
-        m_clutComboBox->set_active(-1);
+        m_clutComboBox->setSelectedClut("");
     }
+
+    updateCurrentLabel();
 
     m_strength->setValue(pp->filmSimulation.strength);
 
@@ -209,7 +246,7 @@ std::unique_ptr<ClutComboBox::ClutModel> ClutComboBox::cm;
 std::unique_ptr<ClutComboBox::ClutModel> ClutComboBox::cm2;
 
 ClutComboBox::ClutComboBox(const Glib::ustring &path):
-    MyComboBox(),
+    Gtk::TreeView(),
     batchMode(false)
 {
     if (!cm) {
@@ -221,17 +258,71 @@ ClutComboBox::ClutComboBox(const Glib::ustring &path):
     }
 
     set_model(m_model());
+    set_headers_visible(false);
+    set_show_expanders(true);
+    set_level_indentation(6);
+    set_enable_tree_lines(false);
+    set_activate_on_single_click(true);
+    set_enable_search(true);
+    set_search_column(0);
+    get_selection()->set_mode(Gtk::SELECTION_BROWSE);
 
-    if (cm->count > 0) {
-		// Pack a CellRendererText in order to display long Clut file names properly
-		Gtk::CellRendererText* const renderer = Gtk::manage(new Gtk::CellRendererText);
-		renderer->property_ellipsize() = Pango::ELLIPSIZE_END;
-		pack_start(*renderer, false); 
-		add_attribute(*renderer, "text", 0);
-    }
+    Gtk::CellRendererText* const renderer = Gtk::manage(new Gtk::CellRendererText);
+    renderer->property_ellipsize() = Pango::ELLIPSIZE_END;
+    Gtk::TreeViewColumn* const column = Gtk::manage(new Gtk::TreeViewColumn());
+    column->pack_start(*renderer, true);
+    column->add_attribute(renderer->property_text(), m_columns().label);
+    column->add_attribute(renderer->property_weight(), m_columns().weight);
+    column->set_expand(true);
+    append_column(*column);
+
+    get_selection()->signal_changed().connect(sigc::mem_fun(*this, &ClutComboBox::onSelectionChanged));
+    signal_row_activated().connect(sigc::mem_fun(*this, &ClutComboBox::onRowActivated));
 
     if (!options.multiDisplayMode) {
         signal_map().connect(sigc::mem_fun(*this, &ClutComboBox::updateUnchangedEntry));
+    }
+}
+
+
+sigc::signal<void>& ClutComboBox::signal_changed()
+{
+    return sigChanged;
+}
+
+
+void ClutComboBox::onSelectionChanged()
+{
+    Gtk::TreeModel::iterator current = get_selection()->get_selected();
+
+    if (!current) {
+        return;
+    }
+
+    const Glib::ustring filename = (*current)[m_columns().clutFilename];
+
+    if (filename.empty()) {
+        // Folder row: only expands/collapses, never changes the applied film.
+        return;
+    }
+
+    selectedClutFilename = filename;
+    sigChanged.emit();
+}
+
+
+void ClutComboBox::onRowActivated(const Gtk::TreeModel::Path& path, Gtk::TreeViewColumn* /*column*/)
+{
+    // Folders toggle open/closed on a single click; films are applied via the
+    // selection-changed signal, so nothing more to do for them here.
+    Gtk::TreeModel::iterator iter = m_model()->get_iter(path);
+
+    if (iter && !iter->children().empty()) {
+        if (row_expanded(path)) {
+            collapse_row(path);
+        } else {
+            expand_row(path, false);
+        }
     }
 }
 
@@ -284,6 +375,7 @@ void ClutComboBox::updateUnchangedEntry()
             Gtk::TreeModel::Row row = *(m_model()->append());
             row[m_columns().label] = M("GENERAL_UNCHANGED");
             row[m_columns().clutFilename] = "NULL";
+            row[m_columns().weight] = 400;
         }
     } else {
         if (c.size() > 0) {
@@ -299,6 +391,7 @@ ClutComboBox::ClutColumns::ClutColumns()
 {
     add( label );
     add( clutFilename );
+    add( weight );
 }
 
 ClutComboBox::ClutModel::ClutModel(const Glib::ustring &path)
@@ -350,6 +443,7 @@ int ClutComboBox::ClutModel::parseDir(const Glib::ustring& path)
                     for (const auto& entry : sorted_dir_dirs(path)) {
                         auto newRow = row ? *m_model->append(row.children()) : *m_model->append();
                         newRow[m_columns.label] = entry.first;
+                        newRow[m_columns.weight] = 700;
 
                         nextDirs.emplace_back(entry.second, newRow);
                     }
@@ -405,6 +499,7 @@ int ClutComboBox::ClutModel::parseDir(const Glib::ustring& path)
             auto newRow = row ? *m_model->append(row.children()) : *m_model->append();
             newRow[m_columns.label] = name;
             newRow[m_columns.clutFilename] = entry;
+            newRow[m_columns.weight] = 400;
 
             ++fileCount;
 
@@ -425,27 +520,31 @@ int ClutComboBox::foundClutsCount() const
 
 Glib::ustring ClutComboBox::getSelectedClut()
 {
-    Glib::ustring result;
-    Gtk::TreeModel::iterator current = get_active();
-    Gtk::TreeModel::Row row = *current;
-
-    if ( row ) {
-        result = row[ m_columns().clutFilename ];
-    }
-
-    return result;
+    return selectedClutFilename;
 }
 
 void ClutComboBox::setSelectedClut( Glib::ustring filename )
 {
-    if ( !filename.empty() ) {
-        Gtk::TreeIter found = findRowByClutFilename( m_model()->children(), filename );
+    if ( filename.empty() ) {
+        selectedClutFilename.clear();
+        get_selection()->unselect_all();
+        return;
+    }
 
-        if ( found ) {
-            set_active( found );
-        } else {
-            set_active(-1);
+    Gtk::TreeIter found = findRowByClutFilename( m_model()->children(), filename );
+
+    if ( found ) {
+        selectedClutFilename = filename;
+        const Gtk::TreeModel::Path path = m_model()->get_path( found );
+        expand_to_path( path );
+        get_selection()->select( found );
+
+        if ( get_realized() ) {
+            set_cursor( path );
         }
+    } else {
+        selectedClutFilename.clear();
+        get_selection()->unselect_all();
     }
 }
 

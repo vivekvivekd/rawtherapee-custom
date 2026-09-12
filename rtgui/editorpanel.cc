@@ -1737,6 +1737,21 @@ bool EditorPanel::handleShortcutKey (GdkEventKey* event)
     bool altgr = event->state & GDK_MOD5_MASK;
 #endif
 
+#if defined(__APPLE__)
+    // macOS convention: Cmd+Z undo, Cmd+Shift+Z redo (Ctrl+Z / Ctrl+Shift+Z keep working too)
+    if ((event->state & GDK_MOD2_MASK) && !ctrl && !alt) {
+        if (event->keyval == GDK_KEY_z) {
+            history->undo ();
+            return true;
+        }
+
+        if (event->keyval == GDK_KEY_Z) {
+            history->redo ();
+            return true;
+        }
+    }
+#endif
+
     // Editor Layout
     switch (event->keyval) {
         case GDK_KEY_L:

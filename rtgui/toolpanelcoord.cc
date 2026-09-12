@@ -144,6 +144,10 @@ const std::vector<ToolTree> COLOR_PANEL_TOOLS = {
         .children = {},
     },
     {
+        .id = Tool::FILM_GRAIN,
+        .children = {},
+    },
+    {
         .id = Tool::FILM_NEGATIVE,
         .children = {},
     },
@@ -397,6 +401,7 @@ ToolPanelCoordinator::ToolPanelCoordinator (bool batch) : ipc (nullptr), favorit
     hsvequalizer        = Gtk::manage(new HSVEqualizer());
     filmSimulation      = Gtk::manage(new FilmSimulation());
     softlight           = Gtk::manage(new SoftLight());
+    filmGrain           = Gtk::manage(new FilmGrain());
     dehaze              = Gtk::manage(new Dehaze());
     sensorbayer         = Gtk::manage(new SensorBayer());
     sensorxtrans        = Gtk::manage(new SensorXTrans());
@@ -722,6 +727,8 @@ std::string ToolPanelCoordinator::getToolName(Tool tool)
             return FilmSimulation::TOOL_NAME;
         case Tool::SOFT_LIGHT:
             return SoftLight::TOOL_NAME;
+        case Tool::FILM_GRAIN:
+            return FilmGrain::TOOL_NAME;
         case Tool::DEHAZE:
             return Dehaze::TOOL_NAME;
         case Tool::SENSOR_BAYER:
@@ -2100,6 +2107,8 @@ FoldableToolPanel *ToolPanelCoordinator::getFoldableToolPanel(Tool tool) const
             return filmSimulation;
         case Tool::SOFT_LIGHT:
             return softlight;
+        case Tool::FILM_GRAIN:
+            return filmGrain;
         case Tool::DEHAZE:
             return dehaze;
         case Tool::SENSOR_BAYER:

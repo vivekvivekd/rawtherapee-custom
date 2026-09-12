@@ -41,6 +41,9 @@
 */
 
 #include "imagefloat.h"
+#include "labimage.h"
+#include "procparams.h"
+#include <algorithm>
 #include "improcfun.h"
 #include "rt_math.h"
 
@@ -385,6 +388,54 @@ void ImProcFunctions::filmGrain(Imagefloat *rgb, int isogr, int strengr, int sca
 
     GrainEvaluator ge(0, 0, bfw, bfh, scale, divgr, call, fw, fh);
     ge(isogr, strengr, scalegr, divgr, rgb, multiThread, call, fw, fh);
+}
+
+
+void ImProcFunctions::filmGrainGlobal(LabImage *lab, const procparams::FilmGrainParams &p, int offX, int offY, int fullW, int fullH)
+{
+    if (!p.enabled || p.strength <= 0 || !lab) {
+        return;
+    }
+
+    const int W = lab->W;
+    const int H = lab->H;
+
+    if (W <= 0 || H <= 0) {
+        return;
+    }
+
+    // The evaluator only touches the "g" plane, which the Local Adjustments code
+    // uses to carry L. Work in preview-pixel coordinates but normalise against
+    // the full image reduced by the same preview scale, so the grain pattern sits
+    // at the same place on the photo at every zoom level.
+    const double sc = std::max(scale, 1.0);
+    const int ox = static_cast<int>(offX / sc);
+    const int oy = static_cast<int>(offY / sc);
+    const int fww = std::max(1, static_cast<int>(fullW / sc));
+    const int fhh = std::max(1, static_cast<int>(fullH / sc));
+
+    Imagefloat tmp(W, H);
+
+#ifdef _OPENMP
+    #pragma omp parallel for if (multiThread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            tmp.g(y, x) = lab->L[y][x];
+        }
+    }
+
+    GrainEvaluator ge(ox, oy, fww, fhh, scale, static_cast<float>(p.gamma), 1, fww, fhh);
+    ge(p.iso, p.strength, p.scale, static_cast<float>(p.gamma), &tmp, multiThread, 1, fww, fhh);
+
+#ifdef _OPENMP
+    #pragma omp parallel for if (multiThread)
+#endif
+    for (int y = 0; y < H; ++y) {
+        for (int x = 0; x < W; ++x) {
+            lab->L[y][x] = tmp.g(y, x);
+        }
+    }
 }
 
 } // namespace rtengine

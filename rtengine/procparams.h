@@ -1668,6 +1668,22 @@ struct SoftLightParams {
     bool operator!=(const SoftLightParams &other) const;
 };
 
+/**
+ * Global film grain (same generator as the Local Adjustments grain, applied to the whole image).
+ */
+struct FilmGrainParams {
+    bool enabled;
+    int iso;        // grain size distribution, 20..6400
+    int strength;   // 0..100
+    int scale;      // 0..100
+    double gamma;   // 0.2..3.0
+
+    FilmGrainParams();
+
+    bool operator==(const FilmGrainParams &other) const;
+    bool operator!=(const FilmGrainParams &other) const;
+};
+
 
 struct DehazeParams {
     bool enabled;
@@ -1963,6 +1979,7 @@ public:
     HSVEqualizerParams      hsvequalizer;    ///< hsv wavelet parameters
     FilmSimulationParams    filmSimulation;  ///< film simulation parameters
     SoftLightParams         softlight;       ///< softlight parameters
+    FilmGrainParams         filmGrain;       ///< global film grain parameters
     DehazeParams            dehaze;          ///< dehaze parameters
     FilmNegativeParams      filmNegative;    ///< Film negative parameters
     int                     rank;            ///< Custom image quality ranking

@@ -1249,6 +1249,24 @@ bool FileBrowser::keyPressed (GdkEventKey* event)
     } else if (event->keyval == GDK_KEY_End) {
         selectLast (shift);
         return true;
+    } else if (event->keyval == GDK_KEY_d && !ctrl && !shift && !alt) {
+        // 'd' = develop: open the selected image(s) in the editor, unless typing in a text field
+        Gtk::Window* const top = dynamic_cast<Gtk::Window*>(get_toplevel());
+        Gtk::Widget* const focus = top ? top->get_focus() : nullptr;
+
+        if (!dynamic_cast<Gtk::Entry*>(focus) && !dynamic_cast<Gtk::TextView*>(focus)) {
+            std::vector<FileBrowserEntry*> mselected;
+
+            for (size_t i = 0; i < selected.size(); i++) {
+                mselected.push_back (static_cast<FileBrowserEntry*>(selected[i]));
+            }
+
+            if (!mselected.empty()) {
+                openRequested(mselected);
+            }
+
+            return true;
+        }
     } else if(event->keyval == GDK_KEY_Return || event->keyval == GDK_KEY_KP_Enter) {
         std::vector<FileBrowserEntry*> mselected;
 

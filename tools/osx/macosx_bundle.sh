@@ -420,7 +420,7 @@ mkdir -p "${ETC}"/gtk-3.0
 install_name_tool -delete_rpath @loader_path/../lib "${LIB}"/libpixbufloader_svg.so
 install_name_tool -change @rpath/librsvg-2.2.dylib "${LOCAL_PREFIX}"/lib/librsvg-2.2.dylib  "${LIB}"/libpixbufloader_svg.so
 # codesign Frameworks
-sudo codesign --sign "${CODESIGNID}" --force "${LIB}"/*
+codesign --sign "${CODESIGNID}" --force "${LIB}"/*
 # Build databases
 "${LOCAL_PREFIX}"/bin/gdk-pixbuf-query-loaders "${LIB}"/libpixbufloader*[^dylib] > "${ETC}"/gtk-3.0/gdk-pixbuf.loaders
 "${LOCAL_PREFIX}"/bin/gtk-query-immodules-3.0 "${LIB}"/im-* > "${ETC}"/gtk-3.0/gtk.immodules || "${LOCAL_PREFIX}"/bin/gtk-query-immodules "${LIB}"/im-* > "${ETC}"/gtk-3.0/gtk.immodules
@@ -481,7 +481,7 @@ install_name_tool -delete_rpath RawTherapee.app/Contents/Frameworks "${EXECUTABL
 install_name_tool -add_rpath /Applications/"${LIB}" "${EXECUTABLE}"-cli 2>/dev/null
 
 # Link to libomp instead of libgomp
-sudo install_name_tool -change /Applications/RawTherapee.app/Contents/Frameworks/libgomp.1.dylib /Applications/RawTherapee.app/Contents/Frameworks/libomp.dylib RawTherapee.app/Contents/Frameworks/libfftw3f_omp.3.dylib
+install_name_tool -change /Applications/RawTherapee.app/Contents/Frameworks/libgomp.1.dylib /Applications/RawTherapee.app/Contents/Frameworks/libomp.dylib RawTherapee.app/Contents/Frameworks/libfftw3f_omp.3.dylib
 if [[ -e "${LIB}/libgomp.1.dylib" ]]; then
     rm "${LIB}/libgomp.1.dylib"
 fi
@@ -520,8 +520,8 @@ if [[ -n $UNIVERSAL_URL ]]; then
     for lib in RawTherapee-arm64.app/Contents/Frameworks/* ; do
         lipo -create -output $(basename $lib) RawTherapee-arm64.app/Contents/Frameworks/$(basename $lib) RawTherapee-x86_64.app/Contents/Frameworks/$(basename $lib)
     done
-    sudo mv *so *dylib RawTherapee.app/Contents/Frameworks
-    sudo mv *-cli RawTherapee.app/Contents/MacOS
+    mv *so *dylib RawTherapee.app/Contents/Frameworks
+    mv *-cli RawTherapee.app/Contents/MacOS
     rm -r RawTherapee-arm64.app
     rm -r RawTherapee-x86_64.app
 else

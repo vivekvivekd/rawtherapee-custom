@@ -2214,6 +2214,7 @@ void ImProcCoordinator::updatePreviewImage(int todo, bool panningRelatedChange)
             }
 
             ipf.softLight(nprevl, params->softlight);
+            ipf.filmGrainGlobal(nprevl, params->filmGrain, 0, 0, fw, fh);
 
 
             if (params->icm.workingTRC != ColorManagementParams::WorkingTrc::NONE && params->icm.trcExp) {

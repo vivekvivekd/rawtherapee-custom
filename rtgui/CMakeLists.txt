@@ -64,6 +64,7 @@ set(RT_GUI_TOOL_PANEL_SOURCES
     tools/sharpening.cc
     tools/sharpenmicro.cc
     tools/softlight.cc
+    tools/filmgrain.cc
     tools/spot.cc
     tools/tonecurve.cc
     tools/toneequalizer.cc

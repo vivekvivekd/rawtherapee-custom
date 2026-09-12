@@ -752,6 +752,17 @@ bool RTWindow::keyPressed (GdkEventKey* event)
         toggle_fullscreen();
     }
 
+    // Plain 'f' toggles fullscreen (Lightroom convention), unless the user is
+    // typing in a text field.
+    if (event->keyval == GDK_KEY_f && (event->state & gtk_accelerator_get_default_mod_mask()) == 0) {
+        Gtk::Widget* const focus = get_focus();
+
+        if (!dynamic_cast<Gtk::Entry*>(focus) && !dynamic_cast<Gtk::TextView*>(focus)) {
+            toggle_fullscreen();
+            return true;
+        }
+    }
+
     if (App::get().isSimpleEditor())
         // in simpleEditor mode, there's no other tab that can handle pressed keys, so we can send the event to editor panel then return
     {

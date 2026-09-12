@@ -1711,6 +1711,11 @@ HISTORY_MSG_SIGMAFIN;Final contrast Attenuation response
 HISTORY_MSG_SIGMATON;Toning Attenuation response
 HISTORY_MSG_SOFTLIGHT_ENABLED;Soft light
 HISTORY_MSG_SOFTLIGHT_STRENGTH;Soft light - Strength
+HISTORY_MSG_FILMGRAIN_ENABLED;Film grain
+HISTORY_MSG_FILMGRAIN_ISO;Film grain - ISO
+HISTORY_MSG_FILMGRAIN_STRENGTH;Film grain - Strength
+HISTORY_MSG_FILMGRAIN_SCALE;Film grain - Scale
+HISTORY_MSG_FILMGRAIN_GAMMA;Film grain - Gamma
 HISTORY_MSG_SPOT;Spot removal
 HISTORY_MSG_SPOT_ENTRY;Spot removal - Point modif.
 HISTORY_MSG_TEMPOUT;CAM02 automatic temperature
@@ -2048,6 +2053,7 @@ PARTIALPASTE_SHARPENEDGE;Edges
 PARTIALPASTE_SHARPENING;Sharpening (USM/RL)
 PARTIALPASTE_SHARPENMICRO;Microcontrast
 PARTIALPASTE_SOFTLIGHT;Soft light
+PARTIALPASTE_FILMGRAIN;Film grain
 PARTIALPASTE_SPOT;Spot removal
 PARTIALPASTE_TM_FATTAL;Dynamic range compression
 PARTIALPASTE_TONE_EQUALIZER;Tone equalizer
@@ -4446,6 +4452,12 @@ TP_SHARPENMICRO_CONTRAST;Contrast threshold
 TP_SHARPENMICRO_LABEL;Microcontrast
 TP_SHARPENMICRO_MATRIX;3×3 matrix instead of 5×5
 TP_SHARPENMICRO_UNIFORMITY;Uniformity
+TP_FILMGRAIN_LABEL;Film Grain
+TP_FILMGRAIN_ISO;Distribution (ISO)
+TP_FILMGRAIN_STRENGTH;Strength
+TP_FILMGRAIN_SCALE;Scale
+TP_FILMGRAIN_GAMMA;Gamma
+TP_FILMGRAIN_TOOLTIP;Adds film-like grain to the whole image.\nGrain is rendered at full resolution, so judge it at 100% zoom: the fit-to-screen preview looks smoother than the exported file.
 TP_SOFTLIGHT_LABEL;Soft Light
 TP_SOFTLIGHT_STRENGTH;Strength
 TP_SPOT_COUNTLABEL;%1 point(s)

@@ -80,6 +80,7 @@
 #include "tools/sharpening.h"
 #include "tools/sharpenmicro.h"
 #include "tools/softlight.h"
+#include "tools/filmgrain.h"
 #include "tools/spot.h"
 #include "tools/tonecurve.h"
 #include "tools/toneequalizer.h"
@@ -158,6 +159,7 @@ protected:
     DirPyrEqualizer* dirpyrequalizer;
     HSVEqualizer* hsvequalizer;
     SoftLight *softlight;
+    FilmGrain *filmGrain;
     Dehaze *dehaze;
     FilmSimulation *filmSimulation;
     SensorBayer * sensorbayer;
@@ -295,6 +297,7 @@ public:
         HSV_EQUALIZER,
         FILM_SIMULATION,
         SOFT_LIGHT,
+        FILM_GRAIN,
         DEHAZE,
         SENSOR_BAYER,
         SENSOR_XTRANS,

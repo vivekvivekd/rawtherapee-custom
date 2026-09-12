@@ -1684,6 +1684,7 @@ void Crop::update(int todo)
         }
         
         parent->ipf.softLight(labnCrop, params.softlight);
+        parent->ipf.filmGrainGlobal(labnCrop, params.filmGrain, cropx, cropy, parent->fw, parent->fh);
 
         if (params.icm.workingTRC != ColorManagementParams::WorkingTrc::NONE && params.icm.trcExp) {
             const int GW = labnCrop->W;

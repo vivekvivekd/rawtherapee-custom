@@ -2541,8 +2541,7 @@ bool FileCatalog::handleShortcutKey (GdkEventKey* event)
 
     if (!ctrl && !alt) {
         switch(event->keyval) {
-        case GDK_KEY_d:
-        case GDK_KEY_D:
+        case GDK_KEY_D: // Shift+D clears filters ('d' alone opens the selection in the editor)
             categoryButtonToggled(bFilterClear, false);
             return true;
         }
@@ -2638,11 +2637,8 @@ bool FileCatalog::handleShortcutKey (GdkEventKey* event)
 
     if (!ctrl && !alt) {
         switch (event->keyval) {
-        case GDK_KEY_f:
+        case GDK_KEY_F: // Shift+F: quick inspector ('f' alone toggles fullscreen)
             fileBrowser->getInspector()->showWindow(false, true);
-            return true;
-        case GDK_KEY_F:
-            fileBrowser->getInspector()->showWindow(false, false);
             return true;
         }
     }
@@ -2657,7 +2653,6 @@ bool FileCatalog::handleShortcutKeyRelease(GdkEventKey* event)
 
     if (!ctrl && !alt) {
         switch (event->keyval) {
-        case GDK_KEY_f:
         case GDK_KEY_F:
             fileBrowser->getInspector()->hideWindow();
             return true;

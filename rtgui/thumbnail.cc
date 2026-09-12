@@ -708,6 +708,7 @@ void Thumbnail::setProcParams (const ProcParams& pp, ParamsEdited* pe, int whoCh
         || pparams->hsvequalizer != pp.hsvequalizer
         || pparams->filmSimulation != pp.filmSimulation
         || pparams->softlight != pp.softlight
+        || pparams->filmGrain != pp.filmGrain
         || pparams->dehaze != pp.dehaze
         || pparams->filmNegative != pp.filmNegative
         || whoChangedIt == FILEBROWSER
