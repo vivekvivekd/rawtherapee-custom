@@ -48,3 +48,19 @@ tools/osx/install-custom.sh     # bundle, re-sign, install to /Applications
 official release uses, so existing settings carry over) and without the hardened
 runtime (ad-hoc dylibs fail library validation otherwise). `tools/osx/macosx_bundle.sh`
 has its `sudo` calls removed so the bundle step runs unattended.
+
+## mood.camera recipes as processing profiles
+`tools/mood/mood2pp3.py` converts mood.camera preset cards (`tools/mood/recipes.json`,
+values transcribed from the "Get settings" cards on mood.camera) into partial
+RawTherapee processing profiles: one per community preset (26) plus one per base
+emulation (17). They land in the user profile folder under `mood/` and show up in the
+editor's Processing Profiles dropdown. Each profile sets Film Simulation (a HaldCLUT
+standing in for the mood emulation), Film Grain, Exposure (brightness, contrast,
+parametric curve, fade), Shadows/Highlights (dynamic range), Lab chromaticity
+(saturation / mute), a Colour Toning Lab shift (temp / tint / mono tone) and Soft Light
+(bloom). Halation and aberration have no RawTherapee equivalent and are noted in the
+profile header. Re-run the script after editing `recipes.json` or the emulation table.
+
+Note: the black-and-white HaldCLUTs in the common "RawTherapee Film Simulation" pack are
+single-channel grayscale PNGs, which RawTherapee silently ignores. Convert them once:
+`magick in.png -type TrueColor -define png:color-type=2 out.png`.
