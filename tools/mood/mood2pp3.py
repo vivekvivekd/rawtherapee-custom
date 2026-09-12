@@ -33,7 +33,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_OUT = os.path.expanduser(
-    "~/Library/Containers/com.rawtherapee.rawtherapee5/Data/Library/Application Support/RawTherapee/config/profiles/mood")
+    "~/Library/Containers/com.rawtherapee.rawtherapee5/Data/Library/Application Support/RawTherapee5.13-custom/config/profiles/mood")
 DEFAULT_CLUTS = os.path.expanduser("~/Downloads/HaldCLUT")
 
 # mood.camera base emulation -> (HaldCLUT relative path, extra temp, extra tint, description)
